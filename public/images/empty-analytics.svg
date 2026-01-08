@@ -1,0 +1,39 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Empty State Illustration: No Analytics Data -->
+
+  <!-- Background Circle -->
+  <circle cx="200" cy="135" r="85" fill="#EBF8FF" stroke="#BEE3F8" stroke-width="2"/>
+
+  <!-- Chart Icon Base -->
+  <rect x="150" y="160" width="100" height="3" fill="#CBD5E0"/>
+  <rect x="150" y="100" width="3" height="63" fill="#CBD5E0"/>
+
+  <!-- Bar Chart (empty/low bars) -->
+  <rect x="165" y="145" width="15" height="15" rx="2" fill="#E2E8F0" stroke="#CBD5E0" stroke-width="1"/>
+  <rect x="190" y="140" width="15" height="20" rx="2" fill="#E2E8F0" stroke="#CBD5E0" stroke-width="1"/>
+  <rect x="215" y="148" width="15" height="12" rx="2" fill="#E2E8F0" stroke="#CBD5E0" stroke-width="1"/>
+
+  <!-- Line Chart (flat) -->
+  <path d="M 160 125 L 175 125 L 190 125 L 205 125 L 220 125" stroke="#90CDF4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+
+  <!-- Data points -->
+  <circle cx="160" cy="125" r="3" fill="#4299E1"/>
+  <circle cx="175" cy="125" r="3" fill="#4299E1"/>
+  <circle cx="190" cy="125" r="3" fill="#4299E1"/>
+  <circle cx="205" cy="125" r="3" fill="#4299E1"/>
+  <circle cx="220" cy="125" r="3" fill="#4299E1"/>
+
+  <!-- Dashed trend line -->
+  <line x1="155" y1="115" x2="225" y2="115" stroke="#A0AEC0" stroke-width="1" stroke-dasharray="4 4" opacity="0.4"/>
+
+  <!-- Text -->
+  <text x="200" y="215" font-family="Arial, sans-serif" font-size="20" fill="#2D3748" text-anchor="middle" font-weight="600">
+    No Analytics Data
+  </text>
+  <text x="200" y="240" font-family="Arial, sans-serif" font-size="14" fill="#718096" text-anchor="middle">
+    Analytics will be available once you have
+  </text>
+  <text x="200" y="260" font-family="Arial, sans-serif" font-size="14" fill="#718096" text-anchor="middle">
+    orders and activity to track
+  </text>
+</svg>

@@ -1,0 +1,33 @@
+# PatLinks Admin Panel - Disallow all web crawlers
+# This is an admin interface and should not be indexed by search engines
+
+User-agent: *
+Disallow: /
+
+# Explicitly block common search engine bots
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
+
+User-agent: Slurp
+Disallow: /
+
+User-agent: DuckDuckBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: YandexBot
+Disallow: /
+
+# Block all pages
+Disallow: /*
+
+# Security: Prevent access to sensitive paths
+Disallow: /admin
+Disallow: /api
+Disallow: /login
+Disallow: /dashboard

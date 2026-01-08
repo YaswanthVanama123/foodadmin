@@ -1,0 +1,22 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Empty State Illustration: No Data -->
+
+  <!-- Background Circle -->
+  <circle cx="200" cy="150" r="80" fill="#F7FAFC" stroke="#E2E8F0" stroke-width="2"/>
+
+  <!-- Document Icon -->
+  <path d="M170 120 H230 V180 H170 V120 Z" fill="#CBD5E0" stroke="#A0AEC0" stroke-width="2"/>
+  <path d="M180 135 H220 M180 145 H220 M180 155 H210" stroke="#718096" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Magnifying Glass -->
+  <circle cx="215" cy="165" r="15" fill="none" stroke="#4A5568" stroke-width="3"/>
+  <line x1="225" y1="175" x2="235" y2="185" stroke="#4A5568" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Text -->
+  <text x="200" y="230" font-family="Arial, sans-serif" font-size="18" fill="#4A5568" text-anchor="middle" font-weight="600">
+    No Data Available
+  </text>
+  <text x="200" y="255" font-family="Arial, sans-serif" font-size="14" fill="#718096" text-anchor="middle">
+    There's nothing to display here yet
+  </text>
+</svg>

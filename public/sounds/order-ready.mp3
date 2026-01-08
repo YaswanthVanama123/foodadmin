@@ -1,0 +1,20 @@
+// PLACEHOLDER FILE FOR AUDIO
+// This is a placeholder for the order ready notification sound.
+// Replace this file with an actual MP3 audio file.
+//
+// Recommended sound characteristics:
+// - Duration: 1-2 seconds
+// - Volume: Moderate
+// - Tone: Success sound, positive chime, or completion bell
+// - Different from new-order.mp3 (to distinguish notifications)
+// - Format: MP3 (for broad browser support)
+//
+// Free sound sources:
+// - Freesound: https://freesound.org/search/?q=success+notification
+// - Zapsplat: https://www.zapsplat.com/sound-effect-category/alerts-and-notifications/
+// - Mixkit: https://mixkit.co/free-sound-effects/notification/
+// - Notification Sounds: https://notificationsounds.com/
+//
+// Search terms: "success notification", "completion sound", "positive chime", "order complete"
+//
+// Suggested sound: A double-bell or ascending tone to indicate completion/success

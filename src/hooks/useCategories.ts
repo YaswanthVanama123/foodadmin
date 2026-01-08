@@ -1,0 +1,82 @@
+import { useState, useEffect, useCallback } from 'react';
+import { categoriesApi } from '../api/categories.api';
+import { Category, CategoryFormData } from '../types';
+
+export const useCategories = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await categoriesApi.getAll();
+      // Sort by display order
+      const sorted = data.sort((a, b) => a.displayOrder - b.displayOrder);
+      setCategories(sorted);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch categories');
+      console.error('Error fetching categories:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  const createCategory = async (data: CategoryFormData) => {
+    try {
+      const newCategory = await categoriesApi.create(data);
+      await fetchCategories();
+      return newCategory;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create category');
+      throw err;
+    }
+  };
+
+  const updateCategory = async (id: string, data: Partial<CategoryFormData>) => {
+    try {
+      const updatedCategory = await categoriesApi.update(id, data);
+      await fetchCategories();
+      return updatedCategory;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update category');
+      throw err;
+    }
+  };
+
+  const deleteCategory = async (id: string) => {
+    try {
+      await categoriesApi.delete(id);
+      await fetchCategories();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete category');
+      throw err;
+    }
+  };
+
+  const toggleStatus = async (id: string) => {
+    try {
+      await categoriesApi.toggleStatus(id);
+      await fetchCategories();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to toggle category status');
+      throw err;
+    }
+  };
+
+  return {
+    categories,
+    isLoading,
+    error,
+    refetch: fetchCategories,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    toggleStatus,
+  };
+};

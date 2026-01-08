@@ -1,0 +1,32 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Empty State Illustration: No Orders -->
+
+  <!-- Background Circle -->
+  <circle cx="200" cy="135" r="85" fill="#FFF5F5" stroke="#FED7D7" stroke-width="2"/>
+
+  <!-- Clipboard/Order Icon -->
+  <rect x="165" y="95" width="70" height="90" rx="4" fill="white" stroke="#FC8181" stroke-width="2"/>
+  <rect x="185" y="85" width="30" height="15" rx="3" fill="#FC8181"/>
+
+  <!-- Checkboxes (empty) -->
+  <rect x="180" y="115" width="12" height="12" rx="2" fill="none" stroke="#CBD5E0" stroke-width="2"/>
+  <rect x="180" y="135" width="12" height="12" rx="2" fill="none" stroke="#CBD5E0" stroke-width="2"/>
+  <rect x="180" y="155" width="12" height="12" rx="2" fill="none" stroke="#CBD5E0" stroke-width="2"/>
+
+  <!-- Lines (faded) -->
+  <line x1="197" y1="121" x2="215" y2="121" stroke="#E2E8F0" stroke-width="2" stroke-linecap="round"/>
+  <line x1="197" y1="141" x2="215" y2="141" stroke="#E2E8F0" stroke-width="2" stroke-linecap="round"/>
+  <line x1="197" y1="161" x2="215" y2="161" stroke="#E2E8F0" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- X mark overlay -->
+  <line x1="180" y1="105" x2="220" y2="145" stroke="#FC8181" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  <line x1="220" y1="105" x2="180" y2="145" stroke="#FC8181" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Text -->
+  <text x="200" y="230" font-family="Arial, sans-serif" font-size="20" fill="#2D3748" text-anchor="middle" font-weight="600">
+    No Orders Yet
+  </text>
+  <text x="200" y="255" font-family="Arial, sans-serif" font-size="14" fill="#718096" text-anchor="middle">
+    Orders will appear here once customers place them
+  </text>
+</svg>
