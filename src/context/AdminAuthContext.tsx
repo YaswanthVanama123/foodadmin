@@ -25,13 +25,30 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const login = async (username: string, password: string): Promise<void> => {
     try {
       setIsLoading(true);
+
+      // Preserve the restaurant ID that was set during login page initialization
+      const existingRestaurantId = localStorage.getItem(STORAGE_KEYS.RESTAURANT_ID);
+      console.log('[Auth Context] Existing restaurant ID before login:', existingRestaurantId);
+
       const credentials: LoginFormData = { username, password };
       const { token, admin: adminData } = await authApi.login(credentials);
+
+      console.log('[Auth Context] Login response - admin data:', adminData);
+      console.log('[Auth Context] Admin restaurantId from response:', adminData.restaurantId);
 
       // Store token and admin data
       localStorage.setItem(STORAGE_KEYS.ADMIN_TOKEN, token);
       localStorage.setItem(STORAGE_KEYS.ADMIN_DATA, JSON.stringify(adminData));
-      localStorage.setItem(STORAGE_KEYS.RESTAURANT_ID, adminData.restaurantId);
+
+      // Use existing restaurant ID if admin data doesn't have it
+      const restaurantIdToStore = adminData.restaurantId || existingRestaurantId;
+      console.log('[Auth Context] Storing restaurant ID:', restaurantIdToStore);
+
+      if (restaurantIdToStore) {
+        localStorage.setItem(STORAGE_KEYS.RESTAURANT_ID, restaurantIdToStore);
+      } else {
+        console.error('[Auth Context] No restaurant ID available!');
+      }
 
       // Update state
       setAdmin(adminData);
@@ -97,23 +114,34 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   /**
    * Check authentication status on mount
+   * Optimistic check - just verify token and cached data exist
+   * If token is invalid, API interceptor will handle 401/403 and redirect to login
    */
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       const token = localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN);
+      const cachedAdmin = localStorage.getItem(STORAGE_KEYS.ADMIN_DATA);
+      const restaurantId = localStorage.getItem(STORAGE_KEYS.RESTAURANT_ID);
 
-      if (!token) {
-        setIsLoading(false);
-        return;
+      console.log('[Auth Context] Initial auth check:', { hasToken: !!token, hasAdmin: !!cachedAdmin, restaurantId });
+
+      if (token && cachedAdmin && restaurantId) {
+        try {
+          // Use cached admin data to avoid unnecessary API call on every page load
+          const adminData = JSON.parse(cachedAdmin);
+          setAdmin(adminData);
+          setIsAuthenticated(true);
+          console.log('[Auth Context] Restored session from localStorage');
+        } catch (error) {
+          console.error('Failed to parse cached admin data:', error);
+          // Clear invalid cache
+          localStorage.removeItem(STORAGE_KEYS.ADMIN_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.ADMIN_DATA);
+          localStorage.removeItem(STORAGE_KEYS.RESTAURANT_ID);
+        }
       }
 
-      try {
-        // Verify token is still valid by fetching current admin
-        await refreshAdmin();
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        setIsLoading(false);
-      }
+      setIsLoading(false);
     };
 
     checkAuth();

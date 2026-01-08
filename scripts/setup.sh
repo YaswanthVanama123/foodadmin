@@ -1,15 +1,36 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Colors for output
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+# Admin App Setup Script
+# This script sets up the admin application
+# Compatible with Windows Git Bash, Linux, and macOS
 
-echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}   Admin App Setup Script${NC}"
-echo -e "${BLUE}========================================${NC}"
+set -e
+
+# Detect OS
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+    IS_WINDOWS=true
+else
+    IS_WINDOWS=false
+fi
+
+# Colors for output (compatible with Git Bash)
+if [ -t 1 ]; then
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    BLUE='\033[0;34m'
+    NC='\033[0m'
+else
+    RED=''
+    GREEN=''
+    YELLOW=''
+    BLUE=''
+    NC=''
+fi
+
+echo -e "${GREEN}================================${NC}"
+echo -e "${GREEN}Admin App Setup${NC}"
+echo -e "${GREEN}================================${NC}"
 echo ""
 
 # Check if Node.js is installed
@@ -19,68 +40,79 @@ if ! command -v node &> /dev/null; then
     exit 1
 fi
 
-echo -e "${GREEN}Node.js version: $(node --version)${NC}"
-echo -e "${GREEN}npm version: $(npm --version)${NC}"
+echo -e "${GREEN}✓${NC} Node.js is installed: $(node --version)"
+
+# Check if npm is installed
+if ! command -v npm &> /dev/null; then
+    echo -e "${RED}Error: npm is not installed${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✓${NC} npm is installed: $(npm --version)"
 echo ""
 
 # Install dependencies
-echo -e "${BLUE}Installing dependencies...${NC}"
-npm install
+echo -e "${YELLOW}Installing dependencies...${NC}"
+if $IS_WINDOWS; then
+    npm install --no-optional 2>&1 | tee npm-install.log
+else
+    npm install
+fi
 
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Failed to install dependencies${NC}"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✓${NC} Dependencies installed successfully"
+    [ -f npm-install.log ] && rm -f npm-install.log
+else
+    echo -e "${RED}✗${NC} Failed to install dependencies"
+    [ -f npm-install.log ] && echo "See npm-install.log for details"
     exit 1
 fi
 
-echo -e "${GREEN}Dependencies installed successfully${NC}"
 echo ""
 
-# Check if .env file exists, if not copy from .env.example
+# Copy .env.example to .env if it doesn't exist
 if [ ! -f .env ]; then
-    echo -e "${YELLOW}.env file not found. Creating from .env.example...${NC}"
-    if [ -f .env.example ]; then
-        cp .env.example .env
-        echo -e "${GREEN}.env file created successfully${NC}"
+    echo -e "${YELLOW}Creating .env file...${NC}"
+    if $IS_WINDOWS; then
+        # Use cp on Windows Git Bash
+        cp .env.example .env 2>/dev/null || cat .env.example > .env
     else
-        echo -e "${RED}.env.example not found. Creating default .env...${NC}"
-        cat > .env << EOF
-VITE_API_URL=http://localhost:5000
-VITE_SOCKET_URL=http://localhost:5000
-EOF
-        echo -e "${GREEN}Default .env file created${NC}"
+        cp .env.example .env
     fi
+    echo -e "${GREEN}✓${NC} .env file created from .env.example"
+    echo -e "${YELLOW}Note: Please update .env with your configuration${NC}"
 else
-    echo -e "${GREEN}.env file already exists${NC}"
+    echo -e "${YELLOW}ℹ${NC} .env file already exists, skipping..."
 fi
+
 echo ""
 
 # Run build check
-echo -e "${BLUE}Running build check...${NC}"
-npm run build
+echo -e "${YELLOW}Running build check...${NC}"
+npm run build 2>&1 | tail -20
 
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Build check failed${NC}"
-    echo -e "${YELLOW}Please fix the errors and run setup again${NC}"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✓${NC} Build successful"
+else
+    echo -e "${RED}✗${NC} Build failed"
+    echo -e "${YELLOW}Tip: Check for TypeScript errors above${NC}"
     exit 1
 fi
 
-echo -e "${GREEN}Build check passed${NC}"
 echo ""
-
-# Success message
-echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}   Setup Complete!${NC}"
-echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}================================${NC}"
+echo -e "${GREEN}Setup Complete!${NC}"
+echo -e "${GREEN}================================${NC}"
 echo ""
-echo -e "${BLUE}Next steps:${NC}"
-echo -e "1. Make sure the backend server is running on port 5000"
-echo -e "2. Start the dev server: ${GREEN}npm run dev${NC}"
-echo -e "3. Open your browser at: ${GREEN}http://localhost:5173${NC}"
+echo -e "You can now run the development server with:"
+echo -e "${YELLOW}npm run dev${NC}"
 echo ""
-echo -e "${BLUE}Default Admin Credentials:${NC}"
-echo -e "  Username: ${GREEN}admin${NC}"
-echo -e "  Password: ${GREEN}admin123${NC}"
+echo -e "The admin app will be available at:"
+echo -e "${BLUE}http://localhost:5174${NC}"
 echo ""
-echo -e "${YELLOW}Note: Make sure MongoDB is running and backend is seeded${NC}"
-echo -e "${YELLOW}Run 'npm run seed' in the backend directory if needed${NC}"
+echo -e "Default credentials:"
+echo -e "  Username: ${YELLOW}admin${NC}"
+echo -e "  Password: ${YELLOW}admin123${NC}"
+echo ""
+echo -e "${GREEN}Happy coding!${NC}"
 echo ""

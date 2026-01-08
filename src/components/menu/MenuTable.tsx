@@ -21,30 +21,54 @@ const MenuTable: React.FC<MenuTableProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const getCategoryName = (categoryId: string) => {
+  const getCategoryName = (categoryId: string | any) => {
+    // Handle both populated (object) and non-populated (string) categoryId
+    if (typeof categoryId === 'object' && categoryId?.name) {
+      // If populated by backend, it's already an object with name
+      return categoryId.name;
+    }
+
+    // If it's a string ID, find the category in the list
     const category = categories.find((c) => c._id === categoryId);
     return category?.name || 'Unknown';
+  };
+
+  const getImageUrl = (item: MenuItem): string | null => {
+    // Try new images structure first, then fall back to legacy image field
+    const imagePath = item.images?.original || item.image;
+
+    if (!imagePath) return null;
+
+    // If it's already a full URL, use it as-is
+    if (imagePath.startsWith('http')) return imagePath;
+
+    // Otherwise, prepend the backend URL
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+    return `${baseUrl}${imagePath}`;
   };
 
   const columns: Column<MenuItem>[] = [
     {
       key: 'image',
       label: 'Image',
-      render: (item) => (
-        <div className="flex-shrink-0 h-12 w-12">
-          {item.image ? (
-            <img
-              src={item.image}
-              alt={item.name}
-              className="h-12 w-12 rounded-lg object-cover"
-            />
-          ) : (
-            <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-400 text-xs">No image</span>
-            </div>
-          )}
-        </div>
-      ),
+      render: (item) => {
+        const imageUrl = getImageUrl(item);
+        return (
+          <div className="flex-shrink-0 h-12 w-12">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={item.name}
+                className="h-12 w-12 rounded-lg object-cover"
+              />
+            ) : (
+              <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-400 text-xs">No image</span>
+              </div>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: 'name',

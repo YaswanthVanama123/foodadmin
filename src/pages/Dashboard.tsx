@@ -56,19 +56,19 @@ const Dashboard = () => {
 
   // Update stats when orders change
   useEffect(() => {
-    const updateStats = () => {
-      if (!stats) return;
+    if (!stats) return;
 
-      // Recalculate active orders count
-      const activeCount = activeOrders.length;
+    // Recalculate active orders count
+    const activeCount = activeOrders.length;
 
+    // Only update if the count actually changed
+    if (stats.activeOrders !== activeCount) {
       setStats((prevStats) =>
         prevStats ? { ...prevStats, activeOrders: activeCount } : null
       );
-    };
-
-    updateStats();
-  }, [activeOrders]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeOrders.length]); // Only depend on the length, not the entire array
 
   // Handle order status update
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {

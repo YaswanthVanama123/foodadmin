@@ -1,11 +1,12 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/AdminAuthContext';
-import { authApi } from '../api';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
+import { extractSubdomain, getRestaurantIdBySubdomain } from '../utils/subdomain';
+import { STORAGE_KEYS } from '../utils/constants';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +21,47 @@ const Login: React.FC = () => {
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  // Detect subdomain and fetch restaurant ID on mount
+  useEffect(() => {
+    const initializeRestaurant = async () => {
+      try {
+        const subdomain = extractSubdomain();
+        console.log('[Login] Extracted subdomain:', subdomain);
+
+        if (!subdomain) {
+          toast.error('Please access via restaurant subdomain (e.g., restaurant.localhost:5174)');
+          setIsInitializing(false);
+          return;
+        }
+
+        // Fetch restaurant ID by subdomain
+        console.log('[Login] Fetching restaurant ID for subdomain:', subdomain);
+        const restaurantId = await getRestaurantIdBySubdomain(subdomain);
+        console.log('[Login] Restaurant ID fetched:', restaurantId);
+
+        if (!restaurantId) {
+          toast.error(`Restaurant "${subdomain}" not found. Please check your subdomain.`);
+          setIsInitializing(false);
+          return;
+        }
+
+        // Store restaurant ID in localStorage for API requests
+        localStorage.setItem(STORAGE_KEYS.RESTAURANT_ID, restaurantId);
+        console.log('[Login] Restaurant ID stored in localStorage:', restaurantId);
+        toast.success(`Connected to ${subdomain} restaurant`);
+
+      } catch (error) {
+        console.error('Error initializing restaurant:', error);
+        toast.error('Failed to initialize restaurant context');
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    initializeRestaurant();
+  }, []);
 
   const validateForm = (): boolean => {
     const newErrors = {
@@ -52,8 +94,8 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await authApi.login(formData);
-      login(response.admin, response.token);
+      // Use the auth context's login function which handles everything
+      await login(formData.username, formData.password);
       toast.success('Login successful! Welcome back.');
       navigate('/dashboard');
     } catch (error: any) {
@@ -99,32 +141,38 @@ const Login: React.FC = () => {
 
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Username Input */}
-            <Input
-              type="text"
-              label="Username"
-              placeholder="Enter your username"
-              value={formData.username}
-              onChange={handleChange('username')}
-              error={errors.username}
-              leftIcon={<User className="w-5 h-5" />}
-              disabled={isLoading}
-              autoComplete="username"
-            />
+          {isInitializing ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+              <p className="text-gray-600">Initializing restaurant context...</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Username Input */}
+              <Input
+                type="text"
+                label="Username"
+                placeholder="Enter your username"
+                value={formData.username}
+                onChange={handleChange('username')}
+                error={errors.username}
+                leftIcon={<User className="w-5 h-5" />}
+                disabled={isLoading}
+                autoComplete="username"
+              />
 
-            {/* Password Input */}
-            <Input
-              type="password"
-              label="Password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange('password')}
-              error={errors.password}
-              leftIcon={<Lock className="w-5 h-5" />}
-              disabled={isLoading}
-              autoComplete="current-password"
-            />
+              {/* Password Input */}
+              <Input
+                type="password"
+                label="Password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleChange('password')}
+                error={errors.password}
+                leftIcon={<Lock className="w-5 h-5" />}
+                disabled={isLoading}
+                autoComplete="current-password"
+              />
 
             {/* Login Button */}
             <Button
@@ -138,6 +186,7 @@ const Login: React.FC = () => {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
+          )}
         </div>
 
         {/* Footer */}

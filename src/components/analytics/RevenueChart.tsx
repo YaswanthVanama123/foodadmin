@@ -22,11 +22,6 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ data, loading = false }) =>
     return `$${value.toFixed(2)}`;
   };
 
-  const chartData = data.map((item) => ({
-    ...item,
-    date: formatDate(item.date),
-  }));
-
   if (loading) {
     return (
       <Card>
@@ -42,7 +37,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ data, loading = false }) =>
     );
   }
 
-  if (!data || data.length === 0) {
+  if (!data || !Array.isArray(data) || data.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -50,12 +45,17 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ data, loading = false }) =>
         </CardHeader>
         <CardBody>
           <div className="h-80 flex items-center justify-center">
-            <p className="text-gray-500">No revenue data available for the selected period</p>
+            <p className="text-gray-500">No revenue data available</p>
           </div>
         </CardBody>
       </Card>
     );
   }
+
+  const chartData = data.map((item) => ({
+    ...item,
+    date: formatDate(item.date),
+  }));
 
   return (
     <Card>

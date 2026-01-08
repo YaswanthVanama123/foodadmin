@@ -38,8 +38,10 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Handle 401 Unauthorized
-    if (error.response?.status === 401) {
+    // Handle 401 Unauthorized and 403 Forbidden
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.log('[API Client] Auth error detected, clearing session and redirecting to login');
+
       // Clear auth data
       localStorage.removeItem(STORAGE_KEYS.ADMIN_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.ADMIN_DATA);

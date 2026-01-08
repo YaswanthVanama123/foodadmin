@@ -118,9 +118,15 @@ export interface MenuItem {
   restaurantId: string;
   name: string;
   description: string;
-  categoryId: string;
+  categoryId: string | { _id: string; name: string }; // Can be populated
   price: number;
-  image?: string;
+  image?: string; // Legacy field
+  images?: { // New images structure
+    original?: string;
+    large?: string | null;
+    medium?: string | null;
+    small?: string | null;
+  };
   isAvailable: boolean;
   isVegetarian: boolean;
   isVegan: boolean;
