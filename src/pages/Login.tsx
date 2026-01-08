@@ -2,7 +2,7 @@ import React, { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AdminAuthContext';
 import { authApi } from '../api';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
