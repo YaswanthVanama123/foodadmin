@@ -120,6 +120,7 @@ export interface MenuItem {
   description: string;
   categoryId: string | { _id: string; name: string }; // Can be populated
   price: number;
+  originalPrice?: number;
   image?: string; // Legacy field
   images?: { // New images structure
     original?: string;
@@ -131,6 +132,7 @@ export interface MenuItem {
   isVegetarian: boolean;
   isVegan: boolean;
   isGlutenFree: boolean;
+  isNonVeg: boolean;
   customizationOptions: Customization[];
   preparationTime: number;
   createdAt: string;
@@ -235,10 +237,12 @@ export interface MenuItemFormData {
   description: string;
   categoryId: string;
   price: number;
+  originalPrice?: number;
   isAvailable: boolean;
   isVegetarian: boolean;
   isVegan: boolean;
   isGlutenFree: boolean;
+  isNonVeg: boolean;
   customizationOptions: Customization[];
   preparationTime: number;
 }

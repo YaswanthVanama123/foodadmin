@@ -27,6 +27,7 @@ const Settings: React.FC = () => {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     fetchSettings();
@@ -128,8 +129,53 @@ const Settings: React.FC = () => {
     }
   };
 
+  const validateSettings = (): boolean => {
+    if (!settings) return false;
+
+    const newErrors: { [key: string]: string } = {};
+
+    // Name validation: 2-100 characters (matches backend)
+    if (!settings.name.trim()) {
+      newErrors.name = 'Restaurant name is required';
+    } else if (settings.name.trim().length < 2) {
+      newErrors.name = 'Restaurant name must be at least 2 characters';
+    } else if (settings.name.trim().length > 100) {
+      newErrors.name = 'Restaurant name must not exceed 100 characters';
+    }
+
+    // Email validation (matches backend regex)
+    if (!settings.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(settings.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+
+    // Phone validation
+    if (!settings.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    }
+
+    // Color validation (hex format)
+    const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+    if (settings.branding.primaryColor && !hexColorRegex.test(settings.branding.primaryColor)) {
+      newErrors.primaryColor = 'Invalid color format (use #RRGGBB)';
+    }
+    if (settings.branding.secondaryColor && !hexColorRegex.test(settings.branding.secondaryColor)) {
+      newErrors.secondaryColor = 'Invalid color format (use #RRGGBB)';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSaveSettings = async () => {
     if (!settings) return;
+
+    // Validate before saving
+    if (!validateSettings()) {
+      toast.error('Please fix the validation errors before saving');
+      return;
+    }
 
     try {
       setSaving(true);
@@ -243,21 +289,36 @@ const Settings: React.FC = () => {
               <Input
                 label="Restaurant Name"
                 value={settings.name}
-                onChange={(e) => setSettings({ ...settings, name: e.target.value })}
+                onChange={(e) => {
+                  setSettings({ ...settings, name: e.target.value });
+                  if (errors.name) setErrors({ ...errors, name: '' });
+                }}
+                error={errors.name}
+                required
               />
 
               <Input
                 label="Email"
                 type="email"
                 value={settings.email}
-                onChange={(e) => setSettings({ ...settings, email: e.target.value })}
+                onChange={(e) => {
+                  setSettings({ ...settings, email: e.target.value });
+                  if (errors.email) setErrors({ ...errors, email: '' });
+                }}
+                error={errors.email}
+                required
               />
 
               <Input
                 label="Phone"
                 type="tel"
                 value={settings.phone}
-                onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
+                onChange={(e) => {
+                  setSettings({ ...settings, phone: e.target.value });
+                  if (errors.phone) setErrors({ ...errors, phone: '' });
+                }}
+                error={errors.phone}
+                required
               />
 
               <Input
@@ -284,19 +345,26 @@ const Settings: React.FC = () => {
                   <input
                     type="color"
                     value={settings.branding.primaryColor}
-                    onChange={(e) => setSettings({
-                      ...settings,
-                      branding: { ...settings.branding, primaryColor: e.target.value },
-                    })}
+                    onChange={(e) => {
+                      setSettings({
+                        ...settings,
+                        branding: { ...settings.branding, primaryColor: e.target.value },
+                      });
+                      if (errors.primaryColor) setErrors({ ...errors, primaryColor: '' });
+                    }}
                     className="h-12 w-24 rounded-lg border border-gray-300 cursor-pointer"
                   />
                   <Input
                     value={settings.branding.primaryColor}
-                    onChange={(e) => setSettings({
-                      ...settings,
-                      branding: { ...settings.branding, primaryColor: e.target.value },
-                    })}
+                    onChange={(e) => {
+                      setSettings({
+                        ...settings,
+                        branding: { ...settings.branding, primaryColor: e.target.value },
+                      });
+                      if (errors.primaryColor) setErrors({ ...errors, primaryColor: '' });
+                    }}
                     placeholder="#6366f1"
+                    error={errors.primaryColor}
                   />
                 </div>
               </div>
@@ -309,19 +377,26 @@ const Settings: React.FC = () => {
                   <input
                     type="color"
                     value={settings.branding.secondaryColor}
-                    onChange={(e) => setSettings({
-                      ...settings,
-                      branding: { ...settings.branding, secondaryColor: e.target.value },
-                    })}
+                    onChange={(e) => {
+                      setSettings({
+                        ...settings,
+                        branding: { ...settings.branding, secondaryColor: e.target.value },
+                      });
+                      if (errors.secondaryColor) setErrors({ ...errors, secondaryColor: '' });
+                    }}
                     className="h-12 w-24 rounded-lg border border-gray-300 cursor-pointer"
                   />
                   <Input
                     value={settings.branding.secondaryColor}
-                    onChange={(e) => setSettings({
-                      ...settings,
-                      branding: { ...settings.branding, secondaryColor: e.target.value },
-                    })}
+                    onChange={(e) => {
+                      setSettings({
+                        ...settings,
+                        branding: { ...settings.branding, secondaryColor: e.target.value },
+                      });
+                      if (errors.secondaryColor) setErrors({ ...errors, secondaryColor: '' });
+                    }}
                     placeholder="#8b5cf6"
+                    error={errors.secondaryColor}
                   />
                 </div>
               </div>

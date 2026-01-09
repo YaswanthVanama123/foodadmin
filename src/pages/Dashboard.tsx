@@ -123,25 +123,25 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatsCard
             title="Today's Orders"
-            value={stats.todayOrders}
+            value={stats.todayOrders ?? 0}
             icon={ShoppingBag}
             color="#3b82f6"
           />
           <StatsCard
             title="Today's Revenue"
-            value={formatCurrency(stats.todayRevenue)}
+            value={formatCurrency(stats.todayRevenue ?? 0)}
             icon={DollarSign}
             color="#10b981"
           />
           <StatsCard
             title="Active Orders"
-            value={stats.activeOrders}
+            value={stats.activeOrders ?? 0}
             icon={Package}
             color="#f59e0b"
           />
           <StatsCard
             title="Avg Prep Time"
-            value={`${stats.averagePreparationTime}m`}
+            value={`${stats.averagePreparationTime ?? 0}m`}
             icon={Clock}
             color="#8b5cf6"
           />

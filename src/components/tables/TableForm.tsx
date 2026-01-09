@@ -51,12 +51,23 @@ const TableForm: React.FC<TableFormProps> = ({
   const validate = (): boolean => {
     const newErrors: Partial<TableFormData> = {};
 
+    // Table number validation: 1-20 characters (matches backend)
     if (!formData.tableNumber.trim()) {
       newErrors.tableNumber = 'Table number is required';
+    } else if (formData.tableNumber.trim().length > 20) {
+      newErrors.tableNumber = 'Table number must not exceed 20 characters';
     }
 
+    // Capacity validation: 1-20 (matches backend)
     if (formData.capacity < 1) {
       (newErrors as any).capacity = 'Capacity must be at least 1';
+    } else if (formData.capacity > 20) {
+      (newErrors as any).capacity = 'Capacity must not exceed 20';
+    }
+
+    // Location validation: max 100 characters (matches backend)
+    if (formData.location && formData.location.length > 100) {
+      newErrors.location = 'Location must not exceed 100 characters';
     }
 
     setErrors(newErrors);

@@ -50,14 +50,23 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof CategoryFormData, string>> = {};
 
+    // Name validation: 2-50 characters (matches backend)
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    } else if (formData.name.trim().length > 50) {
+      newErrors.name = 'Name must not exceed 50 characters';
     }
 
+    // Description validation: max 200 characters (matches backend)
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required';
+    } else if (formData.description.trim().length > 200) {
+      newErrors.description = 'Description must not exceed 200 characters';
     }
 
+    // Display order validation: minimum 0 (matches backend)
     if (formData.displayOrder < 0) {
       newErrors.displayOrder = 'Display order must be 0 or greater';
     }

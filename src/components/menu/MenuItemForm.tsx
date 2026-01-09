@@ -29,10 +29,12 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
     description: '',
     categoryId: '',
     price: 0,
+    originalPrice: undefined,
     isAvailable: true,
     isVegetarian: false,
     isVegan: false,
     isGlutenFree: false,
+    isNonVeg: false,
     customizationOptions: [],
     preparationTime: 15,
   });
@@ -47,10 +49,12 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
         description: item.description,
         categoryId: item.categoryId,
         price: item.price,
+        originalPrice: item.originalPrice,
         isAvailable: item.isAvailable,
         isVegetarian: item.isVegetarian,
         isVegan: item.isVegan,
         isGlutenFree: item.isGlutenFree,
+        isNonVeg: item.isNonVeg || false,
         customizationOptions: item.customizationOptions,
         preparationTime: item.preparationTime,
       });
@@ -60,10 +64,12 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
         description: '',
         categoryId: '',
         price: 0,
+        originalPrice: undefined,
         isAvailable: true,
         isVegetarian: false,
         isVegan: false,
         isGlutenFree: false,
+        isNonVeg: false,
         customizationOptions: [],
         preparationTime: 15,
       });
@@ -75,24 +81,43 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof MenuItemFormData, string>> = {};
 
+    // Name validation: 2-100 characters (matches backend)
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    } else if (formData.name.trim().length > 100) {
+      newErrors.name = 'Name must not exceed 100 characters';
     }
 
+    // Description validation: max 500 characters (matches backend)
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required';
+    } else if (formData.description.trim().length > 500) {
+      newErrors.description = 'Description must not exceed 500 characters';
     }
 
     if (!formData.categoryId) {
       newErrors.categoryId = 'Category is required';
     }
 
-    if (formData.price <= 0) {
-      newErrors.price = 'Price must be greater than 0';
+    // Price validation: minimum 0.01 (matches backend)
+    if (formData.price < 0.01) {
+      newErrors.price = 'Price must be at least $0.01';
     }
 
-    if (formData.preparationTime <= 0) {
-      newErrors.preparationTime = 'Preparation time must be greater than 0';
+    // Original price validation: if provided, must be >= current price
+    if (formData.originalPrice !== undefined && formData.originalPrice !== null) {
+      if (formData.originalPrice < 0.01) {
+        newErrors.originalPrice = 'Original price must be at least $0.01';
+      } else if (formData.originalPrice < formData.price) {
+        newErrors.originalPrice = 'Original price must be greater than or equal to current price';
+      }
+    }
+
+    // Preparation time validation: minimum 0 (matches backend)
+    if (formData.preparationTime < 0) {
+      newErrors.preparationTime = 'Preparation time cannot be negative';
     }
 
     setErrors(newErrors);
@@ -160,14 +185,29 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
               />
 
               <Input
-                label="Price"
+                label="Price (After Discount)"
                 type="number"
                 step="0.01"
                 placeholder="0.00"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
                 error={errors.price}
+                helperText="Current selling price"
                 required
+              />
+
+              <Input
+                label="Original Price (Optional)"
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                value={formData.originalPrice || ''}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
+                  setFormData({ ...formData, originalPrice: value });
+                }}
+                error={errors.originalPrice}
+                helperText="For showing discount to customers"
               />
             </div>
 
@@ -205,6 +245,11 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
                   label="Gluten Free"
                   checked={formData.isGlutenFree}
                   onChange={(e) => setFormData({ ...formData, isGlutenFree: e.target.checked })}
+                />
+                <Checkbox
+                  label="Non-Veg"
+                  checked={formData.isNonVeg}
+                  onChange={(e) => setFormData({ ...formData, isNonVeg: e.target.checked })}
                 />
               </div>
             </div>
