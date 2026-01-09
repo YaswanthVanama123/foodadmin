@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client';
+import { STORAGE_KEYS } from '../utils/constants';
 
 /**
  * Socket Service for Multi-Tenant Real-Time Updates
@@ -29,7 +30,13 @@ class SocketService {
 
     console.log(`Connecting to Socket.io namespace: ${namespace}`);
 
+    // Get admin token from localStorage
+    const token = localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN);
+
     this.socket = io(`${SOCKET_BASE_URL}${namespace}`, {
+      auth: {
+        token: token || '',
+      },
       transports: ['websocket', 'polling'],
       autoConnect: true,
       reconnection: true,

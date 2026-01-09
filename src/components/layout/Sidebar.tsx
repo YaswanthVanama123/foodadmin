@@ -8,6 +8,7 @@ import {
   FolderTree,
   Table2,
   BarChart3,
+  Settings,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -29,6 +30,7 @@ const navItems: NavItem[] = [
   { name: 'Categories', path: '/categories', icon: FolderTree },
   { name: 'Tables', path: '/tables', icon: Table2 },
   { name: 'Analytics', path: '/analytics', icon: BarChart3 },
+  { name: 'Settings', path: '/settings', icon: Settings },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {

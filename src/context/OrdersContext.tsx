@@ -71,52 +71,61 @@ export const OrdersProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   /**
    * Handle new order created via socket
    */
-  const handleOrderCreated = useCallback((order: Order) => {
-    console.log('New order created:', order);
+  const handleOrderCreated = useCallback((data: any) => {
+    console.log('New order received:', data);
+
+    // The socket event sends partial order data, fetch full order if needed
+    // For now, add the order data to active orders
     setActiveOrders((prevOrders) => {
+      // Create a basic Order object from the socket data
+      const newOrder: Order = {
+        _id: data.orderId,
+        orderNumber: data.orderNumber,
+        tableNumber: data.tableNumber,
+        items: data.items,
+        subtotal: data.subtotal || 0,
+        tax: data.tax || 0,
+        total: data.total,
+        status: data.status,
+        createdAt: data.createdAt,
+        restaurantId: '',
+        tableId: null,
+        notes: '',
+      } as Order;
+
       // Check if order already exists (prevent duplicates)
-      const exists = prevOrders.some((o) => o._id === order._id);
+      const exists = prevOrders.some((o) => o._id === newOrder._id);
       if (exists) return prevOrders;
 
       // Add new order to the beginning of the list
-      return [order, ...prevOrders];
+      return [newOrder, ...prevOrders];
     });
   }, []);
 
   /**
-   * Handle order updated via socket
+   * Handle order status changed via socket
    */
-  const handleOrderUpdated = useCallback((order: Order) => {
-    console.log('Order updated:', order);
+  const handleOrderStatusChanged = useCallback((data: any) => {
+    console.log('Order status changed:', data);
     setActiveOrders((prevOrders) => {
-      const orderIndex = prevOrders.findIndex((o) => o._id === order._id);
+      const orderIndex = prevOrders.findIndex((o) => o._id === data.orderId);
 
-      // If order is not in active orders and is still active, add it
-      if (orderIndex === -1) {
-        if (order.status !== 'served' && order.status !== 'cancelled') {
-          return [order, ...prevOrders];
-        }
-        return prevOrders;
-      }
+      // If order not found, ignore
+      if (orderIndex === -1) return prevOrders;
 
       // Remove order if it's served or cancelled
-      if (order.status === 'served' || order.status === 'cancelled') {
-        return prevOrders.filter((o) => o._id !== order._id);
+      if (data.status === 'served' || data.status === 'cancelled') {
+        return prevOrders.filter((o) => o._id !== data.orderId);
       }
 
-      // Update order in place
+      // Update order status in place
       const newOrders = [...prevOrders];
-      newOrders[orderIndex] = order;
+      newOrders[orderIndex] = {
+        ...newOrders[orderIndex],
+        status: data.status,
+      };
       return newOrders;
     });
-  }, []);
-
-  /**
-   * Handle order cancelled via socket
-   */
-  const handleOrderCancelled = useCallback((data: { orderId: string }) => {
-    console.log('Order cancelled:', data.orderId);
-    setActiveOrders((prevOrders) => prevOrders.filter((o) => o._id !== data.orderId));
   }, []);
 
   /**
@@ -125,21 +134,19 @@ export const OrdersProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     if (!socket || !isConnected) return;
 
-    // Subscribe to order events
-    socket.on('order:created', handleOrderCreated);
-    socket.on('order:updated', handleOrderUpdated);
-    socket.on('order:cancelled', handleOrderCancelled);
+    // Subscribe to order events (matching backend event names)
+    socket.on('new-order', handleOrderCreated);
+    socket.on('order-status-changed', handleOrderStatusChanged);
 
     console.log('Subscribed to order events');
 
     // Cleanup listeners on unmount
     return () => {
-      socket.off('order:created', handleOrderCreated);
-      socket.off('order:updated', handleOrderUpdated);
-      socket.off('order:cancelled', handleOrderCancelled);
+      socket.off('new-order', handleOrderCreated);
+      socket.off('order-status-changed', handleOrderStatusChanged);
       console.log('Unsubscribed from order events');
     };
-  }, [socket, isConnected, handleOrderCreated, handleOrderUpdated, handleOrderCancelled]);
+  }, [socket, isConnected, handleOrderCreated, handleOrderStatusChanged]);
 
   /**
    * Fetch active orders on mount

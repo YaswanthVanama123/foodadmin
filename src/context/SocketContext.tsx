@@ -26,11 +26,23 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sock.on('connect', () => {
         console.log('Socket connected to restaurant:', restaurantId);
         setIsConnected(true);
+
+        // Automatically join admin room
+        sock.emit('join-admin');
+        console.log('Joining admin room...');
+      });
+
+      sock.on('admin-joined', (data) => {
+        console.log('Successfully joined admin room:', data);
       });
 
       sock.on('disconnect', () => {
         console.log('Socket disconnected from restaurant:', restaurantId);
         setIsConnected(false);
+      });
+
+      sock.on('error', (error) => {
+        console.error('Socket error:', error);
       });
     } catch (error) {
       console.error('Failed to connect to socket:', error);

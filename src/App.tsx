@@ -16,6 +16,7 @@ import Menu from './pages/Menu';
 import Categories from './pages/Categories';
 import Tables from './pages/Tables';
 import Analytics from './pages/Analytics';
+import Settings from './pages/Settings';
 
 const App: React.FC = () => {
   return (
@@ -43,6 +44,7 @@ const App: React.FC = () => {
                 <Route path="/categories" element={<Categories />} />
                 <Route path="/tables" element={<Tables />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/settings" element={<Settings />} />
               </Route>
 
               {/* Catch-all redirect to dashboard */}
