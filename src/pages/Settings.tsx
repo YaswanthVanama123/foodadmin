@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Upload, Save, Image as ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { PageHeader } from '../components/common';
@@ -29,12 +29,20 @@ const Settings: React.FC = () => {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
+  // Prevent duplicate API calls (React Strict Mode)
+  const isFetching = useRef(false);
+
   useEffect(() => {
     fetchSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchSettings = async () => {
+    // Prevent concurrent requests
+    if (isFetching.current) return;
+
     try {
+      isFetching.current = true;
       setLoading(true);
       const restaurantId = localStorage.getItem('restaurantId');
       if (!restaurantId) {
@@ -63,6 +71,7 @@ const Settings: React.FC = () => {
       toast.error('Failed to load settings');
     } finally {
       setLoading(false);
+      isFetching.current = false;
     }
   };
 

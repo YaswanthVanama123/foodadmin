@@ -11,7 +11,7 @@ interface CustomizationBuilderProps {
   onChange: (customizations: Customization[]) => void;
 }
 
-const CustomizationBuilder: React.FC<CustomizationBuilderProps> = ({ value, onChange }) => {
+const CustomizationBuilder: React.FC<CustomizationBuilderProps> = ({ value = [], onChange }) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const addCustomization = () => {

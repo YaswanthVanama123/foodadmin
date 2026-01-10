@@ -6,21 +6,20 @@ import { MenuTable, MenuItemForm } from '../components/menu';
 import Button from '../components/ui/Button';
 import Select from '../components/ui/Select';
 import Modal, { ModalBody, ModalFooter } from '../components/ui/Modal';
-import { useMenu } from '../hooks/useMenu';
-import { useCategories } from '../hooks/useCategories';
+import { useMenuPageData } from '../hooks/useMenuPageData';
 import { MenuItem, MenuItemFormData } from '../types';
 
 const Menu: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedDietary, setSelectedDietary] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<MenuItem | undefined>();
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
 
-  const { categories } = useCategories();
-  const { items, isLoading, createItem, updateItem, deleteItem } = useMenu();
+  const { categories, items, isLoading, createItem, updateItem, deleteItem } = useMenuPageData();
 
-  // Filter items based on search and category
+  // Filter items based on search, category, and dietary preferences
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       const matchesSearch =
@@ -31,9 +30,16 @@ const Menu: React.FC = () => {
       const matchesCategory =
         selectedCategory === '' || item.categoryId === selectedCategory;
 
-      return matchesSearch && matchesCategory;
+      const matchesDietary =
+        selectedDietary === '' ||
+        (selectedDietary === 'vegetarian' && item.isVegetarian) ||
+        (selectedDietary === 'vegan' && item.isVegan) ||
+        (selectedDietary === 'glutenfree' && item.isGlutenFree) ||
+        (selectedDietary === 'nonveg' && item.isNonVeg);
+
+      return matchesSearch && matchesCategory && matchesDietary;
     });
-  }, [items, searchQuery, selectedCategory]);
+  }, [items, searchQuery, selectedCategory, selectedDietary]);
 
   const handleAddItem = () => {
     setSelectedItem(undefined);
@@ -76,6 +82,14 @@ const Menu: React.FC = () => {
     })),
   ];
 
+  const dietaryOptions = [
+    { value: '', label: 'All Items' },
+    { value: 'vegetarian', label: 'Vegetarian' },
+    { value: 'vegan', label: 'Vegan' },
+    { value: 'glutenfree', label: 'Gluten Free' },
+    { value: 'nonveg', label: 'Non-Veg' },
+  ];
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -100,6 +114,13 @@ const Menu: React.FC = () => {
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
             options={categoryOptions}
+          />
+        </div>
+        <div className="w-full sm:w-64">
+          <Select
+            value={selectedDietary}
+            onChange={(e) => setSelectedDietary(e.target.value)}
+            options={dietaryOptions}
           />
         </div>
       </div>

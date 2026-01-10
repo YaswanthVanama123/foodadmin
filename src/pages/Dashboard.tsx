@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PageHeader } from '../components/common';
 import { StatsCard, OrdersGrid } from '../components/dashboard';
 import { useOrders } from '../hooks/useOrders';
@@ -20,20 +20,29 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Prevent duplicate API calls (React Strict Mode)
+  const hasFetchedData = useRef(false);
+  const isFetching = useRef(false);
+
   const { activeOrders, updateOrderStatus } = useOrders(initialOrders);
 
   // Fetch initial data on mount
   useEffect(() => {
+    // Prevent duplicate calls
+    if (hasFetchedData.current || isFetching.current) return;
+
     const fetchDashboardData = async () => {
+      // Prevent duplicate calls
+      if (isFetching.current) return;
+
       try {
+        isFetching.current = true;
+        hasFetchedData.current = true;
         setLoading(true);
         setError(null);
 
-        // Fetch stats and active orders in parallel
-        const [statsData, ordersData] = await Promise.all([
-          dashboardApi.getStats(),
-          dashboardApi.getActiveOrders(),
-        ]);
+        // OPTIMIZATION: Single API call for stats + active orders
+        const { stats: statsData, activeOrders: ordersData } = await dashboardApi.getPageData();
 
         setStats(statsData);
         setInitialOrders(ordersData);
@@ -46,8 +55,10 @@ const Dashboard = () => {
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
         setError('Failed to load dashboard data. Please try again.');
+        hasFetchedData.current = false; // Reset on error to allow retry
       } finally {
         setLoading(false);
+        isFetching.current = false;
       }
     };
 

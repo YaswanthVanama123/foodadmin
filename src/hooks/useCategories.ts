@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { categoriesApi } from '../api/categories.api';
 import { Category, CategoryFormData } from '../types';
 
@@ -7,8 +7,15 @@ export const useCategories = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Prevent duplicate API calls (React Strict Mode)
+  const isFetching = useRef(false);
+
   const fetchCategories = useCallback(async () => {
+    // Prevent concurrent requests
+    if (isFetching.current) return;
+
     try {
+      isFetching.current = true;
       setIsLoading(true);
       setError(null);
       const data = await categoriesApi.getAll();
@@ -20,12 +27,14 @@ export const useCategories = () => {
       console.error('Error fetching categories:', err);
     } finally {
       setIsLoading(false);
+      isFetching.current = false;
     }
   }, []);
 
   useEffect(() => {
     fetchCategories();
-  }, [fetchCategories]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const createCategory = async (data: CategoryFormData) => {
     try {

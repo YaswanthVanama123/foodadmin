@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { tablesApi } from '../api';
 import { Table, TableFormData } from '../types';
 import toast from 'react-hot-toast';
@@ -8,8 +8,15 @@ export const useTables = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Prevent duplicate API calls (React Strict Mode)
+  const isFetching = useRef(false);
+
   const fetchTables = async () => {
+    // Prevent concurrent requests
+    if (isFetching.current) return;
+
     try {
+      isFetching.current = true;
       setLoading(true);
       setError(null);
       const data = await tablesApi.getAll();
@@ -20,6 +27,7 @@ export const useTables = () => {
       toast.error(errorMessage);
     } finally {
       setLoading(false);
+      isFetching.current = false;
     }
   };
 
@@ -63,6 +71,7 @@ export const useTables = () => {
 
   useEffect(() => {
     fetchTables();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

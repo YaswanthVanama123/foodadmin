@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { menuApi } from '../api/menu.api';
 import { MenuItem, MenuFilters } from '../types';
 
@@ -7,8 +7,15 @@ export const useMenu = (filters?: MenuFilters) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Prevent duplicate API calls (React Strict Mode)
+  const isFetching = useRef(false);
+
   const fetchItems = useCallback(async () => {
+    // Prevent concurrent requests
+    if (isFetching.current) return;
+
     try {
+      isFetching.current = true;
       setIsLoading(true);
       setError(null);
       const data = await menuApi.getAll(filters);
@@ -18,12 +25,14 @@ export const useMenu = (filters?: MenuFilters) => {
       console.error('Error fetching menu items:', err);
     } finally {
       setIsLoading(false);
+      isFetching.current = false;
     }
   }, [filters]);
 
   useEffect(() => {
     fetchItems();
-  }, [fetchItems]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(filters)]);
 
   const createItem = async (data: any, image?: File) => {
     try {

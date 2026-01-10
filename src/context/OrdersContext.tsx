@@ -149,11 +149,17 @@ export const OrdersProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [socket, isConnected, handleOrderCreated, handleOrderStatusChanged]);
 
   /**
-   * Fetch active orders on mount
+   * Fetch active orders on mount - REMOVED
+   *
+   * This was causing duplicate API calls since Dashboard now uses
+   * the optimized page-data endpoint that includes active orders.
+   *
+   * Pages that need OrdersContext can call fetchActiveOrders() manually
+   * or use their own data fetching logic.
    */
-  useEffect(() => {
-    fetchActiveOrders();
-  }, [fetchActiveOrders]);
+  // useEffect(() => {
+  //   fetchActiveOrders();
+  // }, [fetchActiveOrders]);
 
   const value: OrdersContextType = {
     activeOrders,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import PageHeader from '../components/common/PageHeader';
 import { KitchenBoard } from '../components/kitchen';
 import { OrderDetailsModal } from '../components/orders';
@@ -17,8 +17,15 @@ const Kitchen: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
+  // Prevent duplicate API calls (React Strict Mode)
+  const isFetching = useRef(false);
+
   const fetchKitchenOrders = useCallback(async () => {
+    // Prevent concurrent requests
+    if (isFetching.current) return;
+
     try {
+      isFetching.current = true;
       const data = await kitchenApi.getOrders();
       setReceivedOrders(data.received);
       setPreparingOrders(data.preparing);
@@ -29,19 +36,14 @@ const Kitchen: React.FC = () => {
       toast.error('Failed to load kitchen orders');
     } finally {
       setIsLoading(false);
+      isFetching.current = false;
     }
   }, []);
 
   useEffect(() => {
     fetchKitchenOrders();
-
-    // Auto-refresh every 30 seconds
-    const intervalId = setInterval(() => {
-      fetchKitchenOrders();
-    }, 30000);
-
-    return () => clearInterval(intervalId);
-  }, [fetchKitchenOrders]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
     try {

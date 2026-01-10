@@ -5,3 +5,6 @@ dist
 build
 .vscode
 .DS_Store
+
+# Generated Firebase service worker (contains sensitive keys from .env)
+public/firebase-messaging-sw.js

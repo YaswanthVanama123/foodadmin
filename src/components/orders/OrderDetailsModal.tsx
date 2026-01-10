@@ -133,20 +133,22 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
           )}
 
           {/* Status History */}
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-3">Status History</h3>
-            <div className="space-y-2">
-              {order.statusHistory.map((history, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between text-sm py-2 px-3 bg-gray-50 rounded"
-                >
-                  <StatusBadge status={history.status} />
-                  <span className="text-gray-600">{formatDate(history.timestamp)}</span>
-                </div>
-              ))}
+          {order.statusHistory && order.statusHistory.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-3">Status History</h3>
+              <div className="space-y-2">
+                {order.statusHistory.map((history, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between text-sm py-2 px-3 bg-gray-50 rounded"
+                  >
+                    <StatusBadge status={history.status} />
+                    <span className="text-gray-600">{formatDate(history.timestamp)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </ModalBody>
       <ModalFooter>

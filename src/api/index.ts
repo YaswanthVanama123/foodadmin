@@ -7,3 +7,4 @@ export { menuApi } from './menu.api';
 export { categoriesApi } from './categories.api';
 export { tablesApi } from './tables.api';
 export { analyticsApi } from './analytics.api';
+export { fcmTokenApi } from './fcmToken.api';

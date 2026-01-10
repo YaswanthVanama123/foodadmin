@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PageHeader from '../components/common/PageHeader';
 import Pagination from '../components/common/Pagination';
 import {
@@ -26,9 +26,16 @@ const Orders: React.FC = () => {
     pages: 1,
   });
 
+  // Prevent duplicate API calls (React Strict Mode)
+  const isFetching = useRef(false);
+
   const fetchOrders = async () => {
-    setIsLoading(true);
+    // Prevent concurrent requests
+    if (isFetching.current) return;
+
     try {
+      isFetching.current = true;
+      setIsLoading(true);
       const response = await ordersApi.getAll(filters);
       setOrders(response.data);
       setPagination(response.pagination);
@@ -37,12 +44,14 @@ const Orders: React.FC = () => {
       toast.error('Failed to load orders');
     } finally {
       setIsLoading(false);
+      isFetching.current = false;
     }
   };
 
   useEffect(() => {
     fetchOrders();
-  }, [filters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.page, filters.limit, filters.status, filters.tableId]);
 
   const handleOrderClick = (order: Order) => {
     setSelectedOrder(order);

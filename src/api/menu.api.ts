@@ -1,7 +1,20 @@
 import { apiClient } from './client';
-import { MenuItem, MenuFilters, MenuItemFormData, ApiResponse } from '../types';
+import { MenuItem, MenuFilters, MenuItemFormData, ApiResponse, Category } from '../types';
+
+export interface MenuPageData {
+  categories: Category[];
+  menuItems: MenuItem[];
+}
 
 export const menuApi = {
+  /**
+   * Get menu management page data (categories + menu items) - OPTIMIZED
+   */
+  getPageData: async (): Promise<MenuPageData> => {
+    const response = await apiClient.get<ApiResponse<MenuPageData>>('/menu/admin/page-data');
+    return response.data.data;
+  },
+
   /**
    * Get all menu items with filters
    */
@@ -21,18 +34,82 @@ export const menuApi = {
   },
 
   /**
-   * Create new menu item
+   * Create new menu item with optional image - OPTIMIZED (SINGLE REQUEST)
    */
-  create: async (data: MenuItemFormData): Promise<MenuItem> => {
-    const response = await apiClient.post<ApiResponse<MenuItem>>('/menu', data);
+  create: async (data: MenuItemFormData, image?: File): Promise<MenuItem> => {
+    const formData = new FormData();
+
+    // Append all menu item fields
+    formData.append('name', data.name);
+    formData.append('description', data.description || '');
+    formData.append('categoryId', data.categoryId);
+    formData.append('price', data.price.toString());
+
+    if (data.originalPrice !== undefined) {
+      formData.append('originalPrice', data.originalPrice.toString());
+    }
+
+    formData.append('isVegetarian', data.isVegetarian ? 'true' : 'false');
+    formData.append('isVegan', data.isVegan ? 'true' : 'false');
+    formData.append('isGlutenFree', data.isGlutenFree ? 'true' : 'false');
+    formData.append('isNonVeg', data.isNonVeg ? 'true' : 'false');
+
+    if (data.preparationTime !== undefined) {
+      formData.append('preparationTime', data.preparationTime.toString());
+    }
+
+    // Stringify customizationOptions for FormData
+    if (data.customizationOptions) {
+      formData.append('customizationOptions', JSON.stringify(data.customizationOptions));
+    }
+
+    // Append image if provided
+    if (image) {
+      formData.append('image', image);
+    }
+
+    const response = await apiClient.post<ApiResponse<MenuItem>>('/menu', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data.data;
   },
 
   /**
-   * Update menu item
+   * Update menu item with optional image - OPTIMIZED (SINGLE REQUEST)
    */
-  update: async (id: string, data: Partial<MenuItemFormData>): Promise<MenuItem> => {
-    const response = await apiClient.put<ApiResponse<MenuItem>>(`/menu/${id}`, data);
+  update: async (id: string, data: Partial<MenuItemFormData>, image?: File): Promise<MenuItem> => {
+    const formData = new FormData();
+
+    // Append only provided fields
+    if (data.name !== undefined) formData.append('name', data.name);
+    if (data.description !== undefined) formData.append('description', data.description);
+    if (data.categoryId !== undefined) formData.append('categoryId', data.categoryId);
+    if (data.price !== undefined) formData.append('price', data.price.toString());
+    if (data.originalPrice !== undefined) formData.append('originalPrice', data.originalPrice.toString());
+    if (data.isAvailable !== undefined) formData.append('isAvailable', data.isAvailable ? 'true' : 'false');
+    if (data.isVegetarian !== undefined) formData.append('isVegetarian', data.isVegetarian ? 'true' : 'false');
+    if (data.isVegan !== undefined) formData.append('isVegan', data.isVegan ? 'true' : 'false');
+    if (data.isGlutenFree !== undefined) formData.append('isGlutenFree', data.isGlutenFree ? 'true' : 'false');
+    if (data.isNonVeg !== undefined) formData.append('isNonVeg', data.isNonVeg ? 'true' : 'false');
+    if (data.preparationTime !== undefined) formData.append('preparationTime', data.preparationTime.toString());
+
+    // Stringify customizationOptions for FormData
+    if (data.customizationOptions !== undefined) {
+      formData.append('customizationOptions', JSON.stringify(data.customizationOptions));
+    }
+
+    // Append image if provided
+    if (image) {
+      formData.append('image', image);
+    }
+
+    const response = await apiClient.put<ApiResponse<MenuItem>>(`/menu/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data.data;
   },
 

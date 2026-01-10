@@ -8,7 +8,30 @@ import {
   ApiResponse,
 } from '../types';
 
+export interface AnalyticsPageData {
+  revenue: {
+    totalRevenue: number;
+    totalOrders: number;
+    averageOrderValue: number;
+    ordersByStatus: any[];
+    dailyRevenue: RevenueData[];
+  };
+  popularItems: PopularItem[];
+  peakHours: PeakHour[];
+  categoryPerformance: CategoryPerformance[];
+}
+
 export const analyticsApi = {
+  /**
+   * Get all analytics page data (combined endpoint) - OPTIMIZED
+   */
+  getPageData: async (dateRange: AnalyticsDateRange): Promise<AnalyticsPageData> => {
+    const response = await apiClient.get<ApiResponse<AnalyticsPageData>>('/analytics/page-data', {
+      params: dateRange,
+    });
+    return response.data.data;
+  },
+
   /**
    * Get revenue analytics
    */
