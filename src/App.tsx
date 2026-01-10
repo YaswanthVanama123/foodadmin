@@ -15,6 +15,7 @@ import Orders from './pages/Orders';
 import Kitchen from './pages/Kitchen';
 import Menu from './pages/Menu';
 import Categories from './pages/Categories';
+import AddOns from './pages/AddOns';
 import Tables from './pages/Tables';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
@@ -62,6 +63,7 @@ const AppContent: React.FC = () => {
         <Route path="/kitchen" element={<Kitchen />} />
         <Route path="/menu" element={<Menu />} />
         <Route path="/categories" element={<Categories />} />
+        <Route path="/addons" element={<AddOns />} />
         <Route path="/tables" element={<Tables />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/settings" element={<Settings />} />

@@ -7,7 +7,8 @@ import Select from '../ui/Select';
 import Checkbox from '../ui/Checkbox';
 import ImageUpload from './ImageUpload';
 import CustomizationBuilder from './CustomizationBuilder';
-import { MenuItem, MenuItemFormData, Category } from '../../types';
+import AddOnsSelector from './AddOnsSelector';
+import { MenuItem, MenuItemFormData, Category, AddOn } from '../../types';
 
 interface MenuItemFormProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface MenuItemFormProps {
   onSubmit: (data: MenuItemFormData, image?: File) => Promise<void>;
   item?: MenuItem;
   categories: Category[];
+  addOns: AddOn[];
 }
 
 const MenuItemForm: React.FC<MenuItemFormProps> = ({
@@ -23,6 +25,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
   onSubmit,
   item,
   categories,
+  addOns,
 }) => {
   const [formData, setFormData] = useState<MenuItemFormData>({
     name: '',
@@ -36,6 +39,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
     isGlutenFree: false,
     isNonVeg: false,
     customizationOptions: [],
+    addOnIds: [],
     preparationTime: 15,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -44,10 +48,15 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
 
   useEffect(() => {
     if (item) {
+      // Extract categoryId - handle both populated and non-populated cases
+      const categoryId = typeof item.categoryId === 'object'
+        ? item.categoryId._id
+        : item.categoryId;
+
       setFormData({
         name: item.name,
         description: item.description,
-        categoryId: item.categoryId,
+        categoryId,
         price: item.price,
         originalPrice: item.originalPrice,
         isAvailable: item.isAvailable,
@@ -56,6 +65,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
         isGlutenFree: item.isGlutenFree,
         isNonVeg: item.isNonVeg || false,
         customizationOptions: item.customizationOptions,
+        addOnIds: item.addOnIds || [],
         preparationTime: item.preparationTime,
       });
     } else {
@@ -71,6 +81,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
         isGlutenFree: false,
         isNonVeg: false,
         customizationOptions: [],
+        addOnIds: [],
         preparationTime: 15,
       });
       setImageFile(null);
@@ -268,6 +279,16 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
                 onChange={(customizations) =>
                   setFormData({ ...formData, customizationOptions: customizations })
                 }
+              />
+            </div>
+
+            <div className="border-t border-gray-200 pt-4">
+              <AddOnsSelector
+                value={formData.addOnIds || []}
+                onChange={(addOnIds) =>
+                  setFormData({ ...formData, addOnIds })
+                }
+                addOns={addOns}
               />
             </div>
           </div>

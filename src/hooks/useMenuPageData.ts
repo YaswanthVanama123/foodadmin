@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { menuApi, MenuPageData } from '../api/menu.api';
-import { MenuItem, Category } from '../types';
+import { MenuItem, Category, AddOn } from '../types';
 
 export const useMenuPageData = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
+  const [addOns, setAddOns] = useState<AddOn[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,6 +23,7 @@ export const useMenuPageData = () => {
       const data = await menuApi.getPageData();
       setCategories(data.categories);
       setItems(data.menuItems);
+      setAddOns(data.addOns);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch menu data');
       console.error('Error fetching menu page data:', err);
@@ -130,6 +132,7 @@ export const useMenuPageData = () => {
   return {
     categories,
     items,
+    addOns,
     isLoading,
     error,
     refetch: fetchData,

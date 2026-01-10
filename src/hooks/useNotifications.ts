@@ -4,6 +4,9 @@ import toast from 'react-hot-toast';
 import firebaseService from '../services/firebase.service';
 import { fcmTokenApi } from '../api';
 
+// LocalStorage key for storing registered FCM token
+const FCM_TOKEN_STORAGE_KEY = 'admin_fcm_token_registered';
+
 interface NotificationCallbacks {
   onOrderUpdate?: (orderId: string) => void;
   onOrderCreated?: () => void;
@@ -174,6 +177,7 @@ export const useNotifications = (
 
   /**
    * Register FCM token with backend
+   * Only sends to backend if token is new or not yet registered in localStorage
    */
   const registerToken = useCallback(async () => {
     if (!isAuthenticated || !firebaseService.isReady()) {
@@ -195,15 +199,29 @@ export const useNotifications = (
       console.log('   Full token:', token);
       console.log('   Token preview:', token.substring(0, 50) + '...');
 
-      // Register with backend
-      console.log('📤 Registering token with backend...');
+      // Check if this token is already registered in localStorage
+      const storedToken = localStorage.getItem(FCM_TOKEN_STORAGE_KEY);
+
+      if (storedToken === token) {
+        console.log('✅ Token already registered in localStorage - skipping backend call');
+        currentToken.current = token;
+        tokenRegistered.current = true;
+        return;
+      }
+
+      // New token or not yet registered - send to backend
+      console.log('📤 Registering new token with backend...');
       const response = await fcmTokenApi.register(token);
       console.log('   Backend response:', response);
+
+      // Store token in localStorage after successful registration
+      localStorage.setItem(FCM_TOKEN_STORAGE_KEY, token);
 
       currentToken.current = token;
       tokenRegistered.current = true;
 
       console.log('✅ FCM token registered with backend successfully (Admin)!');
+      console.log('💾 Token saved to localStorage');
     } catch (error) {
       console.error('❌ Failed to register FCM token:', error);
     }
@@ -218,13 +236,20 @@ export const useNotifications = (
     }
 
     try {
-      await fcmTokenApi.remove();
+      const token = currentToken.current;
+
+      // Send token to backend for removal
+      await fcmTokenApi.remove(token);
       await firebaseService.deleteToken();
+
+      // Remove from localStorage
+      localStorage.removeItem(FCM_TOKEN_STORAGE_KEY);
 
       currentToken.current = null;
       tokenRegistered.current = false;
 
       console.log('✅ FCM token removed from backend (Admin)');
+      console.log('🗑️ Token removed from localStorage');
     } catch (error) {
       console.error('Failed to remove FCM token:', error);
     }

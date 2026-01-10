@@ -113,6 +113,18 @@ export interface Customization {
   options: CustomizationOption[];
 }
 
+export interface AddOn {
+  _id: string;
+  restaurantId: string;
+  name: string;
+  description?: string;
+  price: number;
+  isAvailable: boolean;
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface MenuItem {
   _id: string;
   restaurantId: string;
@@ -134,6 +146,7 @@ export interface MenuItem {
   isGlutenFree: boolean;
   isNonVeg: boolean;
   customizationOptions: Customization[];
+  addOnIds?: string[]; // Array of AddOn IDs
   preparationTime: number;
   createdAt: string;
   updatedAt: string;
@@ -244,7 +257,16 @@ export interface MenuItemFormData {
   isGlutenFree: boolean;
   isNonVeg: boolean;
   customizationOptions: Customization[];
+  addOnIds?: string[];
   preparationTime: number;
+}
+
+export interface AddOnFormData {
+  name: string;
+  description?: string;
+  price: number;
+  isAvailable: boolean;
+  displayOrder: number;
 }
 
 export interface CategoryFormData {

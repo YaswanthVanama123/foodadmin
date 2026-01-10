@@ -17,7 +17,7 @@ const Menu: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<MenuItem | undefined>();
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
 
-  const { categories, items, isLoading, createItem, updateItem, deleteItem } = useMenuPageData();
+  const { categories, items, addOns, isLoading, createItem, updateItem, deleteItem } = useMenuPageData();
 
   // Filter items based on search, category, and dietary preferences
   const filteredItems = useMemo(() => {
@@ -139,6 +139,7 @@ const Menu: React.FC = () => {
         onSubmit={handleSubmit}
         item={selectedItem}
         categories={categories}
+        addOns={addOns}
       />
 
       {/* Delete Confirmation Modal */}

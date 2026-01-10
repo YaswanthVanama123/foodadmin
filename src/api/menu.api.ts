@@ -1,9 +1,10 @@
 import { apiClient } from './client';
-import { MenuItem, MenuFilters, MenuItemFormData, ApiResponse, Category } from '../types';
+import { MenuItem, MenuFilters, MenuItemFormData, ApiResponse, Category, AddOn } from '../types';
 
 export interface MenuPageData {
   categories: Category[];
   menuItems: MenuItem[];
+  addOns: AddOn[];
 }
 
 export const menuApi = {
@@ -63,6 +64,11 @@ export const menuApi = {
       formData.append('customizationOptions', JSON.stringify(data.customizationOptions));
     }
 
+    // Stringify addOnIds for FormData
+    if (data.addOnIds) {
+      formData.append('addOnIds', JSON.stringify(data.addOnIds));
+    }
+
     // Append image if provided
     if (image) {
       formData.append('image', image);
@@ -98,6 +104,11 @@ export const menuApi = {
     // Stringify customizationOptions for FormData
     if (data.customizationOptions !== undefined) {
       formData.append('customizationOptions', JSON.stringify(data.customizationOptions));
+    }
+
+    // Stringify addOnIds for FormData
+    if (data.addOnIds !== undefined) {
+      formData.append('addOnIds', JSON.stringify(data.addOnIds));
     }
 
     // Append image if provided
