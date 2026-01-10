@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { PageHeader } from '../components/common';
 import { StatsCard, OrdersGrid } from '../components/dashboard';
 import { useOrders } from '../hooks/useOrders';
+import { useNotifications } from '../hooks/useNotifications';
+import { useAuth } from '../context/AdminAuthContext';
 import { dashboardApi } from '../api/dashboard.api';
 import { ordersApi } from '../api/orders.api';
 import { DashboardStats, Order, OrderStatus } from '../types';
@@ -15,6 +17,7 @@ import {
 import socketService from '../services/socket';
 
 const Dashboard = () => {
+  const { admin, isAuthenticated } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [initialOrders, setInitialOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +30,7 @@ const Dashboard = () => {
   const { activeOrders, updateOrderStatus } = useOrders(initialOrders);
 
   // Fetch dashboard data function (reusable)
-  const fetchDashboardData = async (showLoading = true) => {
+  const fetchDashboardData = useCallback(async (showLoading = true) => {
     // Prevent duplicate calls
     if (isFetching.current) return;
 
@@ -62,7 +65,19 @@ const Dashboard = () => {
       }
       isFetching.current = false;
     }
-  };
+  }, []);
+
+  // Handle order notifications and refresh dashboard
+  const handleOrderNotification = useCallback(() => {
+    console.log('🔔 [Dashboard] Order notification received - refreshing dashboard...');
+    fetchDashboardData(false);
+  }, [fetchDashboardData]);
+
+  // Setup Firebase notifications with dashboard refresh callbacks
+  useNotifications(isAuthenticated, {
+    onOrderCreated: handleOrderNotification,
+    onOrderUpdate: handleOrderNotification,
+  });
 
   // Fetch initial data on mount
   useEffect(() => {
@@ -96,8 +111,7 @@ const Dashboard = () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       console.log('🗑️ [Dashboard] Visibility change listener removed');
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty deps - we want this to run once and use the latest fetchDashboardData via closure
+  }, [fetchDashboardData]); // Now depends on fetchDashboardData callback
 
   // Update stats when orders change
   useEffect(() => {

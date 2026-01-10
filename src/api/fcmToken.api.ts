@@ -9,7 +9,7 @@ export const fcmTokenApi = {
    * Register FCM token for admin user
    */
   register: async (token: string) => {
-    const response = await apiClient.post('/admin/fcm-token', { token });
+    const response = await apiClient.post('/api/admin/fcm-token', { token });
     return response.data;
   },
 
@@ -17,7 +17,7 @@ export const fcmTokenApi = {
    * Remove FCM token for admin user
    */
   remove: async (token: string) => {
-    const response = await apiClient.delete('/admin/fcm-token', { data: { token } });
+    const response = await apiClient.delete('/api/admin/fcm-token', { data: { token } });
     return response.data;
   },
 };

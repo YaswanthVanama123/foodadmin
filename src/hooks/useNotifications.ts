@@ -200,6 +200,14 @@ export const useNotifications = (
    */
   const registerToken = useCallback(async () => {
     if (!isAuthenticated || !firebaseService.isReady()) {
+      console.log('⏸️ [FCM] Skipping token registration - not authenticated or Firebase not ready');
+      return;
+    }
+
+    // Double-check authentication token exists
+    const authToken = localStorage.getItem('admin_token');
+    if (!authToken) {
+      console.warn('⚠️ [FCM] No authentication token found - admin may not be logged in yet');
       return;
     }
 
@@ -241,8 +249,14 @@ export const useNotifications = (
 
       console.log('✅ FCM token registered with backend successfully (Admin)!');
       console.log('💾 Token saved to localStorage');
-    } catch (error) {
-      console.error('❌ Failed to register FCM token:', error);
+    } catch (error: any) {
+      // Check if it's an authentication error
+      if (error.response?.status === 401) {
+        console.warn('⚠️ [FCM] Authentication required - token registration will retry after login');
+        tokenRegistered.current = false;
+      } else {
+        console.error('❌ Failed to register FCM token:', error);
+      }
     }
   }, [isAuthenticated]);
 
