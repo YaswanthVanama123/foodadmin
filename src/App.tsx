@@ -19,6 +19,7 @@ import AddOns from './pages/AddOns';
 import Tables from './pages/Tables';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
+import Notifications from './pages/Notifications';
 
 /**
  * AppContent component - handles Firebase notifications setup
@@ -66,6 +67,7 @@ const AppContent: React.FC = () => {
         <Route path="/addons" element={<AddOns />} />
         <Route path="/tables" element={<Tables />} />
         <Route path="/analytics" element={<Analytics />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
 

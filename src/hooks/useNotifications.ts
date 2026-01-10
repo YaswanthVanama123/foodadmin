@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import firebaseService from '../services/firebase.service';
 import { fcmTokenApi } from '../api';
+import notificationStorage from '../services/notificationStorage.service';
 
 // LocalStorage key for storing registered FCM token
 const FCM_TOKEN_STORAGE_KEY = 'admin_fcm_token_registered';
@@ -34,6 +35,15 @@ export const useNotifications = (
   const handleSilentNotification = useCallback(
     async (data: Record<string, string>) => {
       console.log('📡 Silent notification received (Admin):', data);
+
+      // Save to localStorage
+      notificationStorage.save({
+        type: 'silent',
+        category: data.category || 'silent',
+        title: data.title || 'Silent Notification',
+        body: data.body || 'Background update',
+        data,
+      });
 
       const action = data.action;
 
@@ -77,6 +87,15 @@ export const useNotifications = (
       // Get title and body from data (sent by backend)
       const title = data.title || 'New Notification';
       const body = data.body || 'You have a new update';
+
+      // Save to localStorage
+      notificationStorage.save({
+        type: 'active',
+        category: category || 'general',
+        title,
+        body,
+        data,
+      });
 
       console.log('📱 Showing toast notification:');
       console.log('   Title:', title);

@@ -9,6 +9,7 @@ import {
   Plus,
   Table2,
   BarChart3,
+  Bell,
   Settings,
 } from 'lucide-react';
 
@@ -32,6 +33,7 @@ const navItems: NavItem[] = [
   { name: 'Add-Ons', path: '/addons', icon: Plus },
   { name: 'Tables', path: '/tables', icon: Table2 },
   { name: 'Analytics', path: '/analytics', icon: BarChart3 },
+  { name: 'Notifications', path: '/notifications', icon: Bell },
   { name: 'Settings', path: '/settings', icon: Settings },
 ];
 

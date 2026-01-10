@@ -26,44 +26,78 @@ const Dashboard = () => {
 
   const { activeOrders, updateOrderStatus } = useOrders(initialOrders);
 
+  // Fetch dashboard data function (reusable)
+  const fetchDashboardData = async (showLoading = true) => {
+    // Prevent duplicate calls
+    if (isFetching.current) return;
+
+    try {
+      isFetching.current = true;
+      if (showLoading) {
+        setLoading(true);
+      }
+      setError(null);
+
+      console.log('📊 [Dashboard] Fetching dashboard data...');
+
+      // OPTIMIZATION: Single API call for stats + active orders
+      const { stats: statsData, activeOrders: ordersData } = await dashboardApi.getPageData();
+
+      setStats(statsData);
+      setInitialOrders(ordersData);
+
+      console.log('✅ [Dashboard] Data fetched successfully');
+
+      // Ensure socket is connected
+      const restaurantId = localStorage.getItem('restaurantId');
+      if (restaurantId && !socketService.isConnected()) {
+        socketService.connect(restaurantId);
+      }
+    } catch (err) {
+      console.error('❌ [Dashboard] Error fetching dashboard data:', err);
+      setError('Failed to load dashboard data. Please try again.');
+    } finally {
+      if (showLoading) {
+        setLoading(false);
+      }
+      isFetching.current = false;
+    }
+  };
+
   // Fetch initial data on mount
   useEffect(() => {
     // Prevent duplicate calls
     if (hasFetchedData.current || isFetching.current) return;
 
-    const fetchDashboardData = async () => {
-      // Prevent duplicate calls
-      if (isFetching.current) return;
+    hasFetchedData.current = true;
+    fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      try {
-        isFetching.current = true;
-        hasFetchedData.current = true;
-        setLoading(true);
-        setError(null);
-
-        // OPTIMIZATION: Single API call for stats + active orders
-        const { stats: statsData, activeOrders: ordersData } = await dashboardApi.getPageData();
-
-        setStats(statsData);
-        setInitialOrders(ordersData);
-
-        // Ensure socket is connected
-        const restaurantId = localStorage.getItem('restaurantId');
-        if (restaurantId && !socketService.isConnected()) {
-          socketService.connect(restaurantId);
-        }
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err);
-        setError('Failed to load dashboard data. Please try again.');
-        hasFetchedData.current = false; // Reset on error to allow retry
-      } finally {
-        setLoading(false);
-        isFetching.current = false;
+  // Refetch data when tab becomes visible (Page Visibility API)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ [Dashboard] Tab became visible - refreshing data...');
+        // Refetch data without showing loading spinner
+        fetchDashboardData(false);
+      } else {
+        console.log('🙈 [Dashboard] Tab became hidden');
       }
     };
 
-    fetchDashboardData();
-  }, []);
+    // Add event listener
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    console.log('✅ [Dashboard] Visibility change listener added');
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      console.log('🗑️ [Dashboard] Visibility change listener removed');
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - we want this to run once and use the latest fetchDashboardData via closure
 
   // Update stats when orders change
   useEffect(() => {
