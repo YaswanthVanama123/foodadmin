@@ -91,6 +91,7 @@ export interface Order {
   items: OrderItem[];
   subtotal: number;
   tax: number;
+  tip?: number;
   total: number;
   status: OrderStatus;
   statusHistory: StatusHistory[];

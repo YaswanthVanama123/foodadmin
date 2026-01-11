@@ -111,6 +111,14 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 {formatCurrency(order.tax)}
               </span>
             </div>
+            {order.tip && order.tip > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Tip</span>
+                <span className="font-medium text-gray-900">
+                  {formatCurrency(order.tip)}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-300">
               <span className="text-gray-900">Total</span>
               <span className="text-indigo-600">
