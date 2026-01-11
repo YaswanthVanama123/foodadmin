@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { PageHeader } from '../components/common';
 import { StatsCard, OrdersGrid } from '../components/dashboard';
+import PrintServiceBanner from '../components/PrintServiceBanner';
 import { useOrders } from '../hooks/useOrders';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAuth } from '../context/AdminAuthContext';
@@ -15,6 +16,8 @@ import {
   Package
 } from 'lucide-react';
 import socketService from '../services/socket';
+import { printService } from '../services/printService';
+import toast from 'react-hot-toast';
 
 const Dashboard = () => {
   const { admin, isAuthenticated } = useAuth();
@@ -73,9 +76,33 @@ const Dashboard = () => {
     fetchDashboardData(false);
   }, [fetchDashboardData]);
 
+  // Handle new order creation with auto-print
+  const handleOrderCreated = useCallback(async (order: Order) => {
+    console.log('🆕 [Dashboard] New order created:', order.orderNumber);
+
+    // Refresh dashboard data
+    fetchDashboardData(false);
+
+    // Auto-print if print service is connected
+    try {
+      const result = await printService.print(order);
+      if (result.success) {
+        console.log('✅ [Dashboard] Order printed automatically');
+        toast.success(`Order #${order.orderNumber} printed!`, {
+          icon: '🖨️',
+          duration: 2000,
+        });
+      } else {
+        console.log('⚠️ [Dashboard] Print failed:', result.error);
+      }
+    } catch (error) {
+      console.log('⚠️ [Dashboard] Print service not available');
+    }
+  }, [fetchDashboardData]);
+
   // Setup Firebase notifications with dashboard refresh callbacks
   useNotifications(isAuthenticated, {
-    onOrderCreated: handleOrderNotification,
+    onOrderCreated: handleOrderCreated,
     onOrderUpdate: handleOrderNotification,
   });
 
@@ -176,6 +203,9 @@ const Dashboard = () => {
         title="Dashboard"
         subtitle="Real-time overview of your restaurant operations"
       />
+
+      {/* Print Service Banner */}
+      <PrintServiceBanner />
 
       {/* Stats Cards */}
       {stats && (

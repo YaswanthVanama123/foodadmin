@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AdminAuthProvider, useAuth } from './context/AdminAuthContext';
@@ -7,6 +7,8 @@ import { OrdersProvider, useOrders } from './context/OrdersContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AdminLayout } from './components/layout';
 import { useNotifications } from './hooks/useNotifications';
+import InvalidUrlError from './components/InvalidUrlError';
+import { extractSubdomain } from './utils/subdomain';
 
 // Pages
 import Login from './pages/Login';
@@ -78,6 +80,23 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  const [urlError, setUrlError] = useState<Error | null>(null);
+
+  // Validate subdomain on app load
+  useEffect(() => {
+    try {
+      extractSubdomain(); // Will throw if URL is invalid
+    } catch (error) {
+      console.error('Invalid URL detected:', error);
+      setUrlError(error as Error);
+    }
+  }, []);
+
+  // Show error page if URL is invalid
+  if (urlError) {
+    return <InvalidUrlError error={urlError} />;
+  }
+
   return (
     <BrowserRouter>
       <AdminAuthProvider>

@@ -1,26 +1,67 @@
 /**
  * Extract subdomain from current hostname
+ * For admin app, REQUIRE the "admin" prefix for security
  * Examples:
- * - spice.localhost:5175 → spice
- * - restaurant.patlinks.com → restaurant
+ * - admin.spice.localhost:5175 → spice ✅
+ * - admin.restaurant.patlinks.com → restaurant ✅
+ * - spice.localhost:5175 → ERROR (missing admin prefix) ❌
  * - localhost:5175 → null
  */
 export function extractSubdomain(): string | null {
   const hostname = window.location.hostname;
   const parts = hostname.split('.');
 
-  // Handle subdomain.localhost
+  // Handle admin.subdomain.localhost (e.g., admin.spice.localhost)
+  if (parts.length === 3 && parts[2] === 'localhost') {
+    if (parts[0] === 'admin') {
+      return parts[1]; // Return "spice" from "admin.spice.localhost" ✅
+    } else {
+      // Missing "admin" prefix - this is a security issue!
+      console.error('⚠️ Admin app must be accessed via admin.{restaurant}.localhost');
+      throw new Error('Invalid URL: Admin app requires "admin" prefix (e.g., admin.spice.localhost)');
+    }
+  }
+
+  // Handle subdomain.localhost (REJECT - missing admin prefix)
   if (parts.length === 2 && parts[1] === 'localhost') {
-    return parts[0];
+    console.error('⚠️ Admin app accessed without "admin" prefix:', hostname);
+    throw new Error('Invalid URL: Admin app requires "admin" prefix (e.g., admin.spice.localhost)');
   }
 
-  // Handle subdomain.domain.com
-  if (parts.length >= 3) {
-    return parts[0];
+  // Handle admin.subdomain.domain.com (production)
+  if (parts.length >= 4) {
+    if (parts[0] === 'admin') {
+      return parts[1]; // Return "restaurant" from "admin.restaurant.yourdomain.com" ✅
+    } else {
+      throw new Error('Invalid URL: Admin app requires "admin" prefix');
+    }
   }
 
-  // No subdomain
-  return null;
+  // Handle subdomain.domain.com (production - REJECT)
+  if (parts.length === 3) {
+    console.error('⚠️ Admin app accessed without "admin" prefix:', hostname);
+    throw new Error('Invalid URL: Admin app requires "admin" prefix');
+  }
+
+  // No subdomain (localhost only - allow for development)
+  if (hostname === 'localhost') {
+    return null; // Allow plain localhost for testing
+  }
+
+  throw new Error('Invalid hostname for admin app');
+}
+
+/**
+ * Validate that current URL has proper admin prefix
+ * Throws error if accessed without "admin" subdomain
+ */
+export function validateAdminUrl(): void {
+  try {
+    extractSubdomain();
+  } catch (error) {
+    // Show user-friendly error page
+    throw error;
+  }
 }
 
 /**

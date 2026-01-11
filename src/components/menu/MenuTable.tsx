@@ -121,6 +121,11 @@ const MenuTable: React.FC<MenuTableProps> = ({
               GF
             </Badge>
           )}
+          {item.isNonVeg && (
+            <Badge variant="danger" size="sm">
+              Non-Veg
+            </Badge>
+          )}
         </div>
       ),
     },
